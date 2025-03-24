@@ -25,8 +25,9 @@ RUN mkdir -p /run/trafficserver && \
 # Update the local state directory configuration
 RUN sed -i "s|proxy.config.local_state_dir.*|proxy.config.local_state_dir STRING /run/trafficserver|" /etc/trafficserver/records.config
 
-# Add a rule to remap.config
-RUN echo "map http://localhost/ http://127.0.0.1/ @plugin=generator.so" > /etc/trafficserver/remap.config
+# Add rules to remap.config
+RUN echo "map http://localhost/ http://127.0.0.1/ @plugin=generator.so" > /etc/trafficserver/remap.config && \
+    echo "map http://ats-debug-generator/ http://127.0.0.1/ @plugin=generator.so" >> /etc/trafficserver/remap.config
 
 # Fix the debug mode configuration
 RUN sed -i "/proxy.config.diags.debug.enabled/d" /etc/trafficserver/records.config && \
