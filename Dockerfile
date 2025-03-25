@@ -29,13 +29,17 @@ RUN sed -i "s|proxy.config.local_state_dir.*|proxy.config.local_state_dir STRING
 RUN echo "map http://localhost/ http://127.0.0.1/ @plugin=generator.so" > /etc/trafficserver/remap.config && \
     echo "map http://ats-debug-generator/ http://127.0.0.1/ @plugin=generator.so" >> /etc/trafficserver/remap.config
 
-# Fix the debug mode configuration
-RUN sed -i "/proxy.config.diags.debug.enabled/d" /etc/trafficserver/records.config && \
-    echo "CONFIG proxy.config.diags.debug.enabled INT 1" >> /etc/trafficserver/records.config
-
 # Fix the server ports configuration
 RUN sed -i "/proxy.config.http.server_ports/d" /etc/trafficserver/records.config && \
     echo "CONFIG proxy.config.http.server_ports STRING 80 443:ssl" >> /etc/trafficserver/records.config
+
+# Enable access logging
+RUN sed -i "s|proxy.config.log.logging_enabled.*|proxy.config.log.logging_enabled INT 3|" /etc/trafficserver/records.config && \
+    sed -i "s|proxy.config.log.logfile_dir.*|proxy.config.log.logfile_dir STRING /var/log/trafficserver|" /etc/trafficserver/records.config
+
+# Ensure the log directory exists and has the correct permissions
+RUN mkdir -p /var/log/trafficserver && \
+    chown -R trafficserver:trafficserver /var/log/trafficserver
 
 # Expose ports 80 and 443
 EXPOSE 80
